@@ -1,0 +1,9 @@
+{
+  "name": "tangtang-linebot",
+  "version": "1.0.0",
+  "description": "TangTang LINE Bot with Gemini AI",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  }
+}
