@@ -50,13 +50,6 @@ async function replyToLine(replyToken, message) {
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(200).send('TangTang LINE Bot 🦊');
 
-  const signature = req.headers['x-line-signature'];
-  const rawBody = JSON.stringify(req.body);
-
-  if (!verifySignature(rawBody, signature)) {
-    return res.status(401).send('Unauthorized');
-  }
-
   const events = req.body.events || [];
 
   for (const event of events) {
