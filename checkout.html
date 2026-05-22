@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>สั่งซื้อ — TangTang Chinese</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #F13596;
+  --red-dark: #c01078;
+  --red-light: #FFF0F8;
+  --amber: #C9A96E;
+  --ink: #2D1A24;
+  --ink2: #5C3D4E;
+  --ink3: #8C6B7A;
+  --paper: #FFF8FC;
+  --paper2: #FFEDF6;
+  --paper3: #F5C6E0;
+  --green: #1a6b3a;
+  --green-light: #e8f4ed;
+  --blue: #1565c0;
+  --blue-light: #e3f2fd;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', 'Noto Sans Thai', sans-serif; background: var(--paper2); color: var(--ink); min-height: 100vh; }
+
+/* TOPBAR */
+.topbar { background: white; border-bottom: 1px solid var(--paper3); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 12px rgba(241,53,150,.08); }
+.topbar-logo { font-family: 'Noto Serif SC', serif; font-size: 20px; font-weight: 700; color: var(--red); }
+.topbar-back { font-size: 13px; color: var(--ink3); text-decoration: none; display: flex; align-items: center; gap: 5px; }
+.topbar-back:hover { color: var(--red); }
+
+/* LAYOUT */
+.page { max-width: 960px; margin: 0 auto; padding: 24px 16px 80px; display: grid; grid-template-columns: 1fr; gap: 18px; }
+@media (min-width: 768px) { .page { grid-template-columns: 1fr 360px; gap: 24px; padding: 32px 24px 80px; } }
+
+/* CARD */
+.card { background: white; border: 1px solid var(--paper3); border-radius: 18px; padding: 22px; box-shadow: 0 2px 14px rgba(45,26,36,.05); }
+.section-title { font-size: 15px; font-weight: 800; color: var(--ink); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+/* PACKAGE CARDS */
+.pkg-card { border-radius: 16px; padding: 16px; cursor: pointer; transition: .2s; display: flex; flex-direction: column; gap: 12px; }
+.pkg-card:hover { transform: translateY(-1px); }
+.pkg-features { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+.pkg-feature { font-size: 12px; color: var(--ink2); display: flex; align-items: flex-start; gap: 7px; line-height: 1.5; }
+.pkg-feature.ai { background: #FFF0F8; border-radius: 8px; padding: 7px 10px; color: #c01078; font-weight: 700; border: 1px solid #F1359630; }
+
+/* AI BADGE */
+.ai-badge { display: inline-flex; align-items: center; gap: 5px; background: linear-gradient(135deg, #F13596, #c01078); color: white; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; }
+
+/* FORM */
+.form-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.form-field label { font-size: 12px; font-weight: 600; color: var(--ink2); }
+.form-field input { padding: 11px 14px; border: 1.5px solid var(--paper3); border-radius: 10px; font-size: 14px; font-family: inherit; color: var(--ink); background: var(--paper); outline: none; transition: .2s; width: 100%; }
+.form-field input:focus { border-color: var(--red); background: white; box-shadow: 0 0 0 3px rgba(241,53,150,.1); }
+.form-field input::placeholder { color: #ccc; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* PAYMENT */
+.pay-opt { border: 2px solid var(--paper3); border-radius: 12px; padding: 14px 16px; cursor: pointer; transition: .2s; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.pay-opt.selected { border-color: var(--red); background: var(--red-light); }
+
+/* QR */
+.qr-section { padding: 20px; background: var(--paper); border: 1px solid var(--paper3); border-radius: 12px; text-align: center; margin-top: 12px; }
+.qr-img { width: 170px; height: 170px; margin: 0 auto 12px; background: white; border: 2px solid var(--paper3); border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.qr-img img { width: 100%; height: 100%; object-fit: contain; }
+
+/* SLIP */
+.slip-upload-area { border: 2px dashed var(--paper3); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: .2s; background: var(--paper); position: relative; }
+.slip-upload-area:hover, .slip-upload-area.dragover { border-color: var(--red); background: var(--red-light); }
+.slip-upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.slip-preview { margin-top: 12px; border-radius: 10px; overflow: hidden; border: 1px solid var(--paper3); display: none; }
+.slip-preview img { width: 100%; max-height: 200px; object-fit: contain; display: block; background: var(--paper); }
+.slip-preview-label { font-size: 11px; font-weight: 700; color: var(--green); background: var(--green-light); padding: 6px 12px; text-align: center; }
+
+/* BTN */
+.btn-submit { width: 100%; padding: 16px; background: var(--red); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; font-family: inherit; cursor: pointer; transition: .2s; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-submit:hover { background: var(--red-dark); transform: translateY(-1px); }
+.btn-line { width: 100%; padding: 14px; background: #06C755; color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; transition: .2s; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
+.btn-line:hover { background: #05a847; }
+
+/* SUMMARY */
+.summary-card { position: sticky; top: 70px; }
+.price-total { font-size: 32px; font-weight: 900; color: var(--red); }
+.what-item { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--ink); padding: 5px 0; line-height: 1.5; }
+.what-item::before { content: '✅'; font-size: 12px; flex-shrink: 0; margin-top: 1px; }
+
+/* SUCCESS */
+.success-overlay { display: none; position: fixed; inset: 0; background: rgba(45,26,36,.7); z-index: 999; align-items: center; justify-content: center; padding: 24px; }
+.success-overlay.show { display: flex; }
+.success-card { background: white; border-radius: 20px; padding: 32px 24px; max-width: 400px; width: 100%; text-align: center; }
+.step-num { width: 22px; height: 22px; background: var(--red); color: white; border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="index.html" class="topbar-back">← กลับ</a>
+  <div class="topbar-logo">糖糖中文</div>
+  <div style="font-size:12px;color:var(--ink3)">🔒 ปลอดภัย</div>
+</div>
+
+<div class="page">
+
+  <!-- LEFT COLUMN -->
+  <div style="display:flex;flex-direction:column;gap:18px">
+
+    <!-- COURSE INFO -->
+    <div class="card">
+      <div style="display:flex;gap:14px;align-items:center">
+        <div style="width:72px;height:72px;border-radius:14px;background:var(--red-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:2px solid var(--paper3)">
+          <img src="https://avajarshika.github.io/tangtang/tangtang-happy.png" alt="TangTang" style="width:54px;height:54px;object-fit:contain;animation:float 3s ease-in-out infinite">
+        </div>
+        <div style="flex:1">
+          <div style="display:inline-block;background:var(--red-light);color:var(--red);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:6px">ระบบเรียนภาษาจีน AI</div>
+          <div style="font-size:15px;font-weight:800;color:var(--ink);line-height:1.4">TangTang Chinese — เรียนจีน HSK 1-6 ครบทุกระดับ</div>
+          <div style="font-size:12px;color:var(--ink3);margin-top:4px;line-height:1.6">HSK 1-6 (56 บท) · สื่อสารจริง 59 บท · คลังคำศัพท์ · 10 มินิเกม · <span style="color:var(--red);font-weight:700">🤖 ถังถัง AI</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PACKAGE SELECTOR -->
+    <div class="card">
+      <div class="section-title">💎 เลือกแพ็กเกจ</div>
+      <div style="display:flex;flex-direction:column;gap:12px" id="pkg-list">
+
+        <!-- รายเดือน -->
+        <div class="pkg-card" id="pkg-monthly" onclick="selectPackage('monthly')" style="border:2px solid #e0e0e0">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:44px;height:44px;border-radius:12px;background:#e0f7fa;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📅</div>
+            <div style="flex:1">
+              <div style="font-size:15px;font-weight:800;color:var(--ink)">รายเดือน</div>
+              <div style="font-size:11px;color:var(--ink3);margin-top:2px">เริ่มต้นได้ทันที ยกเลิกได้ทุกเมื่อ</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-size:22px;font-weight:900;color:#0891b2">฿199</div>
+              <div style="font-size:10px;color:var(--ink3)">/เดือน</div>
+            </div>
+          </div>
+          <div class="pkg-features" id="feat-monthly">
+            <div class="pkg-feature">📚 HSK 1-6 ครบ 56 บทเรียน</div>
+            <div class="pkg-feature">💬 บทสื่อสารจริง 59 บท ครบทุกหมวด</div>
+            <div class="pkg-feature">📖 คลังคำศัพท์ + บททดสอบหลังเรียน</div>
+            <div class="pkg-feature">🎮 10 มินิเกม ครบทุกด่าน</div>
+            <div class="pkg-feature">🗺️ Word Map ครบ 87+ คำ</div>
+            <div class="pkg-feature">📒 อีบุค HSK ไล่ระดับเดือนละชุด</div>
+            <div class="pkg-feature ai">🤖 ถังถัง AI — <span style="font-size:13px">20 ข้อ/วัน</span><br><span style="font-size:11px;font-weight:400;color:#c01078">ถามภาษาจีน คำศัพท์ ไวยากรณ์ได้ทันที</span></div>
+          </div>
+        </div>
+
+        <!-- รายปี (แนะนำ) -->
+        <div class="pkg-card" id="pkg-yearly" onclick="selectPackage('yearly')" style="background:linear-gradient(135deg,#1565c0,#1976d2);border:3px solid #ff9800;position:relative">
+          <div style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:#ff9800;color:white;font-size:10px;font-weight:800;padding:3px 16px;border-radius:20px;white-space:nowrap">🔥 ประหยัดที่สุด — เซฟ ฿1,398</div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">⭐</div>
+            <div style="flex:1">
+              <div style="font-size:15px;font-weight:800;color:white">รายปี</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:2px">เพียง ฿83/เดือน ประหยัดกว่า 58%</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-size:12px;color:rgba(255,255,255,.5);text-decoration:line-through">฿1,290</div>
+              <div style="font-size:22px;font-weight:900;color:white">฿990</div>
+              <div style="font-size:10px;color:rgba(255,255,255,.7)">/ปี</div>
+            </div>
+          </div>
+          <div class="pkg-features" id="feat-yearly">
+            <div class="pkg-feature" style="color:rgba(255,255,255,.9)">📚 HSK 1-6 ครบ 56 บทเรียน</div>
+            <div class="pkg-feature" style="color:rgba(255,255,255,.9)">💬 บทสื่อสารจริง 59 บท ครบทุกหมวด</div>
+            <div class="pkg-feature" style="color:rgba(255,255,255,.9)">📖 คลังคำศัพท์ + บททดสอบหลังเรียน</div>
+            <div class="pkg-feature" style="color:rgba(255,255,255,.9)">🎮 10 มินิเกม ครบทุกด่าน</div>
+            <div class="pkg-feature" style="color:rgba(255,255,255,.9)">🗺️ Word Map ครบ 87+ คำ</div>
+            <div class="pkg-feature" style="color:rgba(255,255,255,.9)">📒 อีบุคครบทุก HSK ทุกเล่ม</div>
+            <div class="pkg-feature" style="background:rgba(255,255,255,.15);color:white;border-color:rgba(255,255,255,.3);font-weight:800">🤖 ถังถัง AI — <span style="font-size:13px">50 ข้อ/วัน</span><br><span style="font-size:11px;font-weight:400;opacity:.85">เพิ่มขึ้น 2.5× จากรายเดือน!</span></div>
+          </div>
+        </div>
+
+        <!-- ถาวร -->
+        <div class="pkg-card" id="pkg-lifetime" onclick="selectPackage('lifetime')" style="border:2px solid #e0e0e0">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:44px;height:44px;border-radius:12px;background:#f3e5f5;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🌟</div>
+            <div style="flex:1">
+              <div style="font-size:15px;font-weight:800;color:var(--ink)">ถาวรตลอดชีพ</div>
+              <div style="font-size:11px;color:var(--ink3);margin-top:2px">จ่ายครั้งเดียว ใช้ได้ตลอดชีวิต</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-size:12px;color:#bbb;text-decoration:line-through">฿3,590</div>
+              <div style="font-size:22px;font-weight:900;color:#6b1a6b">฿2,490</div>
+              <div style="font-size:10px;color:var(--ink3)">ครั้งเดียวตลอดชีพ</div>
+            </div>
+          </div>
+          <div class="pkg-features" id="feat-lifetime">
+            <div class="pkg-feature">📚 HSK 1-6 ครบ 56 บทเรียน</div>
+            <div class="pkg-feature">💬 บทสื่อสารจริง 59 บท ครบทุกหมวด</div>
+            <div class="pkg-feature">📖 คลังคำศัพท์ + บททดสอบหลังเรียน</div>
+            <div class="pkg-feature">🎮 10 มินิเกม ครบทุกด่าน</div>
+            <div class="pkg-feature">🗺️ Word Map ครบ 87+ คำ</div>
+            <div class="pkg-feature">📒 อีบุคครบทุก HSK + อัปเดตตลอดชีพ</div>
+            <div class="pkg-feature ai">
+              🤖 ถังถัง AI — <span style="font-size:13px">50 ข้อ/วัน</span><br>
+              <span style="font-size:11px;font-weight:400;color:#c01078">ไม่ต้องต่ออายุ ใช้ได้ตลอด</span><br>
+              <span style="font-size:10px;color:#999;font-weight:400;background:#f5f5f5;border-radius:4px;padding:2px 6px;margin-top:4px;display:inline-block">⚠️ ฟีเจอร์ AI อาจมีค่าใช้จ่ายรายปีในอนาคต หากต้นทุน AI สูงขึ้น</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ถังถัง AI Highlight -->
+    <div class="card" style="background:linear-gradient(135deg,#FFF0F8,#f8d7ef);border-color:#F1359640">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+        <img src="https://avajarshika.github.io/tangtang/tangtang.png" alt="ถังถัง" style="width:48px;height:48px;object-fit:contain">
+        <div>
+          <div style="font-size:15px;font-weight:800;color:var(--ink)">🤖 ถังถัง AI — ฟีเจอร์เด็ดของเรา!</div>
+          <div style="font-size:12px;color:var(--ink3);margin-top:2px">AI ผู้ช่วยสอนจีนที่พูดภาษาไทย พร้อมตอบทุกคำถาม</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+        <div style="background:white;border-radius:10px;padding:10px;border:1px solid #F1359620">
+          <div style="font-weight:700;color:var(--red);margin-bottom:4px">ถามได้เลย เช่น</div>
+          <div style="color:var(--ink2);line-height:1.8">
+            📝 แปลคำศัพท์จีน<br>
+            🔤 อธิบายไวยากรณ์<br>
+            🗣️ ฝึกสนทนาภาษาจีน<br>
+            🎓 ช่วยเตรียมสอบ HSK
+          </div>
+        </div>
+        <div style="background:white;border-radius:10px;padding:10px;border:1px solid #F1359620">
+          <div style="font-weight:700;color:var(--red);margin-bottom:4px">Limit ต่อวัน</div>
+          <div style="color:var(--ink2);line-height:2">
+            🆓 ฟรี — ไม่มี<br>
+            📅 รายเดือน — <b style="color:var(--red)">20 ข้อ/วัน</b><br>
+            ⭐ รายปี — <b style="color:var(--blue)">50 ข้อ/วัน</b><br>
+            🌟 ถาวร — <b style="color:#6b1a6b">50 ข้อ/วัน</b>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:8px;font-size:10px;color:#aaa;background:#f9f9f9;border-radius:8px;padding:6px 10px;line-height:1.6">
+        ⚠️ สำหรับแพ็กเกจถาวร: ฟีเจอร์ AI อาจมีค่าใช้จ่ายรายปีในอนาคต หากต้นทุน AI เพิ่มสูงขึ้น เนื้อหาเรียนและเกมทั้งหมดใช้ได้ตลอดชีพแน่นอน
+      </div>
+    </div>
+
+    <!-- FORM -->
+    <div class="card">
+      <div class="section-title">👤 ข้อมูลสำหรับการสมัครและชำระเงิน</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>ชื่อ-นามสกุล *</label>
+          <input type="text" id="fname" placeholder="ชื่อ นามสกุล">
+        </div>
+        <div class="form-field">
+          <label>เบอร์โทรศัพท์ *</label>
+          <input type="tel" id="phone" placeholder="08x-xxx-xxxx">
+        </div>
+      </div>
+      <div class="form-field">
+        <label>อีเมล * (ใช้สำหรับเข้าสู่ระบบ)</label>
+        <input type="email" id="email" placeholder="email@example.com">
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>รหัสผ่าน * (อย่างน้อย 6 ตัว)</label>
+          <input type="password" id="password" placeholder="••••••">
+        </div>
+        <div class="form-field">
+          <label>ยืนยันรหัสผ่าน *</label>
+          <input type="password" id="password2" placeholder="••••••">
+        </div>
+      </div>
+      <div id="form-err" style="color:var(--red);font-size:13px;min-height:18px;margin-bottom:4px"></div>
+
+      <!-- PAYMENT METHOD -->
+      <div class="section-title" style="margin-top:8px">💳 วิธีการชำระเงิน</div>
+      <div class="pay-opt selected" id="pay-opt-bank" onclick="selectPayMethod('bank')" style="border-color:var(--red);background:var(--red-light);cursor:pointer">
+        <span style="font-size:28px">🏦</span>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700">โอนเข้าบัญชี</div>
+          <div style="font-size:12px;color:var(--ink3);margin-top:1px">ธนาคารไทยพาณิชย์ (SCB)</div>
+        </div>
+        <span style="background:#dcfce7;color:#16a34a;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px">แนะนำ</span>
+      </div>
+
+      <!-- Credit Card Option -->
+      <div class="pay-opt" id="pay-opt-card" onclick="selectPayMethod('card')" style="margin-top:10px;cursor:pointer">
+        <span style="font-size:28px">💳</span>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700">บัตรเครดิต / เดบิต</div>
+          <div style="font-size:12px;color:var(--ink3);margin-top:1px">Visa, Mastercard — รองรับทุกประเทศ 🌍</div>
+        </div>
+        <span style="background:#e3f2fd;color:#1565c0;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px">ต่างประเทศ</span>
+      </div>
+
+      <!-- Card Section -->
+      <div id="payment-card-section" style="display:none;margin-top:12px">
+        <div style="background:#e3f2fd;border:1.5px solid #90caf9;border-radius:14px;padding:16px;text-align:center">
+          <div style="font-size:13px;font-weight:700;color:#1565c0;margin-bottom:8px">💳 ชำระผ่าน Stripe</div>
+          <div style="font-size:12px;color:#1976d2;margin-bottom:12px">ระบบจะพาไปหน้าชำระเงินที่ปลอดภัย<br>รองรับ Visa, Mastercard ทุกประเทศ</div>
+          <button onclick="payWithStripe()" style="width:100%;padding:14px;background:linear-gradient(135deg,#1565c0,#1976d2);color:white;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px">
+            💳 ชำระด้วยบัตรเครดิต/เดบิต
+          </button>
+        </div>
+      </div>
+
+      <!-- Bank Section -->
+      <div id="payment-bank-section" style="margin-top:12px">
+        <div style="background:var(--blue-light);border:1.5px solid #b8cef0;border-radius:14px;padding:16px">
+          <div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:12px">🏦 ข้อมูลบัญชีธนาคาร</div>
+          <div style="font-size:13px;color:var(--ink);margin-bottom:6px;display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #dce8f8"><span style="color:var(--ink3)">ธนาคาร</span><b>ไทยพาณิชย์ (SCB)</b></div>
+          <div style="font-size:13px;color:var(--ink);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #dce8f8">
+            <span style="color:var(--ink3)">เลขบัญชี</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <b style="color:var(--blue);letter-spacing:1px" id="bank-acc-num">557-283-5397</b>
+              <button onclick="copyBankAcc()" id="copy-acc-btn" style="padding:3px 10px;background:#f0f0f0;border:1px solid #ccc;border-radius:8px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer">คัดลอก</button>
+            </div>
+          </div>
+          <div style="font-size:13px;color:var(--ink);display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #dce8f8"><span style="color:var(--ink3)">ชื่อบัญชี</span><b>จารชิกา แก้ววรรณา</b></div>
+          <div style="font-size:13px;color:var(--ink);display:flex;justify-content:space-between;padding:6px 0"><span style="color:var(--ink3)">ยอดโอน</span><b style="color:var(--red);font-size:16px" id="bank-amount">฿990</b></div>
+        </div>
+      </div>
+
+      <!-- SLIP UPLOAD -->
+      <div id="slip-section" style="margin-top:16px">
+        <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px">📎 แนบสลิปการโอนเงิน *</div>
+        <div class="slip-upload-area" id="slip-upload-area"
+          ondragover="event.preventDefault();this.classList.add('dragover')"
+          ondragleave="this.classList.remove('dragover')"
+          ondrop="handleSlipDrop(event)">
+          <input type="file" id="slip-input" accept="image/*" onchange="handleSlipFile(this.files[0])">
+          <div id="slip-placeholder">
+            <div style="font-size:32px;margin-bottom:8px">📷</div>
+            <div style="font-size:13px;font-weight:700;color:var(--ink2)">กดเพื่อเลือกรูปสลิป</div>
+            <div style="font-size:11px;color:var(--ink3);margin-top:4px">หรือลากรูปมาวางตรงนี้ · JPG, PNG</div>
+          </div>
+        </div>
+        <div class="slip-preview" id="slip-preview">
+          <img id="slip-preview-img" src="" alt="สลิป">
+          <div class="slip-preview-label">✅ แนบสลิปแล้ว — กด "ยืนยัน" เพื่อส่ง</div>
+        </div>
+        <div id="slip-err" style="font-size:12px;color:var(--red);min-height:14px;margin-top:4px"></div>
+      </div>
+
+      <div style="margin-top:12px;padding:12px 14px;background:#FBF3E8;border:1px solid #C9A96E;border-radius:10px;font-size:12px;color:#7a5c1a;line-height:1.7">
+        ⚡ ระบบส่งข้อมูลให้แอดมินอัตโนมัติ จะปลดล็อคภายใน 30 นาที
+      </div>
+
+      <!-- REFERRAL CODE -->
+      <div style="margin-top:14px">
+        <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px">🎁 มีโค้ดแนะนำไหม? <span style="font-size:11px;font-weight:400;color:var(--ink3)">(ไม่บังคับ)</span></div>
+        <input type="text" id="referral-code" placeholder="เช่น TANG-AVA001" maxlength="20"
+          style="width:100%;padding:11px 14px;border:1.5px solid var(--paper3);border-radius:10px;font-size:14px;font-family:inherit;color:var(--ink);background:var(--paper);outline:none;text-transform:uppercase"
+          oninput="this.value=this.value.toUpperCase()">
+        <div style="font-size:11px;color:var(--ink3);margin-top:4px">ถ้าเพื่อนแนะนำมา กรอกโค้ดเพื่อให้เพื่อนได้ค่าคอม</div>
+      </div>
+
+      <button class="btn-submit" onclick="submitOrder()">
+        ✅ ยืนยันการสั่งซื้อ — <span id="btn-price">฿990</span>
+      </button>
+      <a href="https://line.me/ti/p/@ava11" target="_blank" class="btn-line">
+        <span style="font-size:18px">🎁</span> แอด LINE @ava11 รับ Bonus ของแถมฟรี
+      </a>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN — SUMMARY -->
+  <div>
+    <div class="card summary-card">
+      <div class="section-title">🛒 สรุปคำสั่งซื้อ</div>
+
+      <!-- Package info (dynamic) -->
+      <div id="summary-pkg-info" style="background:var(--red-light);border-radius:12px;padding:12px 14px;margin-bottom:14px;border:1px solid var(--paper3)">
+        <div style="font-size:13px;font-weight:800;color:var(--red)" id="summary-pkg-name">⭐ รายปี</div>
+        <div style="font-size:12px;color:var(--ink3);margin-top:2px" id="summary-pkg-desc">เพียง ฿83/เดือน ประหยัดกว่า 58%</div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--paper3)">
+        <span style="font-size:13px;color:var(--ink2)">TangTang Chinese Premium</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0">
+        <span style="font-size:15px;font-weight:700">ยอดรวม</span>
+        <span class="price-total" id="summary-price">฿990</span>
+      </div>
+
+      <!-- Benefits -->
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+        <div style="display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--ink2)">
+          <span style="font-size:18px;flex-shrink:0">🔓</span>
+          <span><b>เข้าถึงทันที</b> หลังแอดมินยืนยันสลิป ภายใน 30 นาที</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--ink2)">
+          <span style="font-size:18px;flex-shrink:0">🤖</span>
+          <span><b>ถังถัง AI</b> พูดคุยเรียนรู้ภาษาจีนทุกวัน</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--ink2)">
+          <span style="font-size:18px;flex-shrink:0">🔄</span>
+          <span><b>อัปเดตฟรี</b> เนื้อหาใหม่เพิ่มตลอด</span>
+        </div>
+      </div>
+
+      <!-- What you get -->
+      <div style="border-top:1px solid var(--paper3);padding-top:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px">สิ่งที่จะได้รับ</div>
+        <div class="what-item">📚 HSK 1-6 ครบ 56 บทเรียน</div>
+        <div class="what-item">💬 บทสื่อสารจริง 59 บท ครบทุกหมวด</div>
+        <div class="what-item">📖 คลังคำศัพท์ + บททดสอบหลังเรียน</div>
+        <div class="what-item">Flashcard 1,300+ คำ + SRS จำระยะยาว</div>
+        <div class="what-item">🎮 10 มินิเกม ครบทุกด่าน</div>
+        <div class="what-item">🗺️ Word Map ครบ 87+ คำ + คำรวม 400+</div>
+        <div class="what-item">⚡ Speed Quiz · เรียงประโยค · จับคู่ · ฟังแล้วตอบ</div>
+        <div class="what-item" style="color:var(--red);font-weight:700">🤖 ถังถัง AI ถาม-ตอบภาษาจีนได้ทุกวัน</div>
+
+        <div style="margin-top:12px;padding:12px;background:#FBF3E8;border-radius:10px;border:1px solid #C9A96E">
+          <div style="font-size:11px;font-weight:700;color:var(--amber);margin-bottom:6px">🎁 BONUS ฟรีทันที!</div>
+          <div style="font-size:12px;color:var(--ink2);line-height:1.8">
+            📖 Ebook + แบบฝึกหัดครบทุกบท HSK 1–6<br>
+            <span style="font-size:11px;color:#888">เรียนในแอป → ฝึกใน Ebook → ใช้ได้จริง</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trust badges -->
+      <div style="display:flex;justify-content:center;gap:16px;margin-top:16px;flex-wrap:wrap">
+        <div style="text-align:center;font-size:11px;color:var(--ink3)"><div style="font-size:20px">🔒</div>ปลอดภัย</div>
+        <div style="text-align:center;font-size:11px;color:var(--ink3)"><div style="font-size:20px">⚡</div>เร็ว 30 นาที</div>
+        <div style="text-align:center;font-size:11px;color:var(--ink3)"><div style="font-size:20px">🔄</div>อัปเดตฟรี</div>
+        <div style="text-align:center;font-size:11px;color:var(--ink3)"><div style="font-size:20px">💬</div>LINE Support</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SUCCESS OVERLAY -->
+<div class="success-overlay" id="success-overlay">
+  <div class="success-card">
+    <div style="font-size:56px;margin-bottom:12px">🎉</div>
+    <div style="font-size:22px;font-weight:800;color:var(--ink);margin-bottom:8px">สั่งซื้อสำเร็จ!</div>
+    <div style="font-size:14px;color:var(--ink3);line-height:1.6;margin-bottom:20px">ขอบคุณที่เลือก TangTang Chinese นะคะ 🎉<br>ระบบส่งข้อมูลให้แอดมินแล้ว จะปลดล็อคภายใน 30 นาที</div>
+    <div style="background:var(--paper);border-radius:12px;padding:16px;text-align:left;margin-bottom:20px">
+      <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--ink2);padding:5px 0">
+        <div class="step-num">1</div><span>⏳ แอดมินกำลังตรวจสอบสลิป</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--ink2);padding:5px 0">
+        <div class="step-num">2</div><span>🔓 ปลดล็อค Premium ภายใน 30 นาที</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--ink2);padding:5px 0">
+        <div class="step-num">3</div>
+        <span>📧 เช็คอีเมลของคุณเพื่อรับข้อความยืนยันการปลดล็อคค่ะ<br>
+        <span style="font-size:12px;color:var(--ink3)">หากไม่เจออีเมลในกล่องหลัก ลองเช็คในโฟลเดอร์ <b>Spam</b> หรือ <b>Promotions</b> ด้วยค่ะ 💌</span></span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--ink2);padding:5px 0">
+        <div class="step-num">4</div><span>🤖 ถังถัง AI พร้อมใช้งานทันที!</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--ink2);padding:5px 0">
+        <div class="step-num">5</div><span>🎁 แอด LINE @ava11 รับ Bonus ของแถมฟรี!</span>
+      </div>
+    </div>
+    <a href="https://line.me/ti/p/@ava11" target="_blank" class="btn-line" style="margin-top:0">
+      🎁 แอด LINE รับของแถม คลิก
+    </a>
+    <button onclick="window.location.href='index.html?action=login'" style="width:100%;padding:14px;margin-top:10px;background:var(--red);color:white;border:none;border-radius:12px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer">
+      🔑 เข้าสู่ระบบเลย
+    </button>
+    <button onclick="document.getElementById('success-overlay').classList.remove('show');window.location.href='index.html'" style="width:100%;padding:12px;margin-top:8px;background:none;border:1.5px solid var(--paper3);border-radius:12px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;color:var(--ink3)">
+      กลับหน้าหลัก
+    </button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://zmshxxmcgbxavzlqmpxd.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inptc2h4eG1jZ2J4YXZ6bHFtcHhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NzkwODEsImV4cCI6MjA5MjA1NTA4MX0.USeFzW09aOqqtwtYFaC9lgmcLkpkjz12ciQLrG3IhZQ';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const STRIPE_PRICE_IDS = {
+  monthly:  'price_1TZp5kEbML6Rr0fxjucXw1mi',
+  yearly:   'price_1TZp7HEbML6Rr0fxM7vignqL',
+  lifetime: 'price_1TZp8PEbML6Rr0fx8GUKwLtX',
+};
+
+let selectedPayMethod = 'bank';
+
+function selectPayMethod(method) {
+  selectedPayMethod = method;
+  const bankOpt = document.getElementById('pay-opt-bank');
+  const cardOpt = document.getElementById('pay-opt-card');
+  const bankSection = document.getElementById('payment-bank-section');
+  const slipSection = document.querySelector('[style*="slip-upload-area"]')?.parentElement;
+  const cardSection = document.getElementById('payment-card-section');
+
+  if (method === 'bank') {
+    bankOpt.style.borderColor = 'var(--red)';
+    bankOpt.style.background = 'var(--red-light)';
+    cardOpt.style.borderColor = '#e0e0e0';
+    cardOpt.style.background = 'white';
+    bankSection.style.display = 'block';
+    cardSection.style.display = 'none';
+    document.getElementById('slip-section').style.display = 'block';
+  } else {
+    cardOpt.style.borderColor = '#1565c0';
+    cardOpt.style.background = '#e3f2fd';
+    bankOpt.style.borderColor = '#e0e0e0';
+    bankOpt.style.background = 'white';
+    bankSection.style.display = 'none';
+    cardSection.style.display = 'block';
+    document.getElementById('slip-section').style.display = 'none';
+  }
+}
+
+async function payWithStripe() {
+  const email = document.getElementById('email')?.value?.trim();
+  const name = document.getElementById('name')?.value?.trim();
+
+  if (!email) {
+    alert('กรุณากรอกอีเมลก่อนนะคะ');
+    document.getElementById('email')?.focus();
+    return;
+  }
+
+  const btn = document.querySelector('#payment-card-section button');
+  if (btn) { btn.textContent = '⏳ กำลังเชื่อมต่อ Stripe...'; btn.disabled = true; }
+
+  try {
+    const priceId = STRIPE_PRICE_IDS[selectedPackage];
+    const { data: { session } } = await sb.auth.getSession();
+    const userId = session?.user?.id || '';
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/stripe-checkout`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+      },
+      body: JSON.stringify({
+        priceId,
+        userId,
+        email,
+        successUrl: `${window.location.origin}/checkout.html?success=1&pkg=${selectedPackage}`,
+        cancelUrl: `${window.location.origin}/checkout.html?pkg=${selectedPackage}`,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งค่ะ');
+      if (btn) { btn.textContent = '💳 ชำระด้วยบัตรเครดิต/เดบิต'; btn.disabled = false; }
+    }
+  } catch(e) {
+    alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งค่ะ');
+    if (btn) { btn.textContent = '💳 ชำระด้วยบัตรเครดิต/เดบิต'; btn.disabled = false; }
+  }
+}
+let selectedPrice = '990';
+let selectedAmountInt = 990;
+let slipFile = null;
+let currentSessionUser = null;
+
+const pkgData = {
+  monthly:  { price: '199',   amount: 199,  label: '📅 รายเดือน',       desc: 'เริ่มต้นได้ทันที · ยกเลิกได้ทุกเมื่อ',    ai: '20 ข้อ/วัน' },
+  yearly:   { price: '990',   amount: 990,  label: '⭐ รายปี',           desc: 'เพียง ฿83/เดือน ประหยัดกว่า 58%',           ai: '50 ข้อ/วัน' },
+  lifetime: { price: '2,490', amount: 2490, label: '🌟 ถาวรตลอดชีพ',    desc: 'จ่ายครั้งเดียว ใช้ได้ตลอดชีวิต',             ai: '50 ข้อ/วัน ตลอดชีพ' },
+};
+
+function selectPackage(type) {
+  selectedPackage = type;
+  const pkg = pkgData[type];
+  selectedPrice = pkg.price;
+  selectedAmountInt = pkg.amount;
+
+  // update card borders
+  document.getElementById('pkg-monthly').style.cssText  = 'border:2px solid #e0e0e0;border-radius:16px;padding:16px;cursor:pointer;transition:.2s;display:flex;flex-direction:column;gap:12px';
+  document.getElementById('pkg-yearly').style.cssText   = 'background:linear-gradient(135deg,#1565c0,#1976d2);border:3px solid #ff9800;border-radius:16px;padding:16px;cursor:pointer;transition:.2s;display:flex;flex-direction:column;gap:12px;position:relative';
+  document.getElementById('pkg-lifetime').style.cssText = 'border:2px solid #e0e0e0;border-radius:16px;padding:16px;cursor:pointer;transition:.2s;display:flex;flex-direction:column;gap:12px';
+
+  if (type === 'monthly')  document.getElementById('pkg-monthly').style.border  = '2px solid #0891b2';
+  if (type === 'yearly')   document.getElementById('pkg-yearly').style.border   = '3px solid #ff9800';
+  if (type === 'lifetime') document.getElementById('pkg-lifetime').style.border = '2px solid #6b1a6b';
+
+  // update summary
+  document.getElementById('summary-pkg-name').textContent = pkg.label;
+  document.getElementById('summary-pkg-desc').textContent = pkg.desc + ' · 🤖 AI ' + pkg.ai;
+  document.getElementById('summary-price').textContent = '฿' + pkg.price;
+  document.getElementById('bank-amount').textContent = '฿' + pkg.price;
+  document.getElementById('btn-price').textContent = '฿' + pkg.price;
+}
+
+// auto-select from URL param
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+
+  // เช็ค success จาก Stripe
+  if (params.get('success') === '1') {
+    document.body.innerHTML = `
+      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--paper2);font-family:'DM Sans','Noto Sans Thai',sans-serif;padding:20px">
+        <div style="background:white;border-radius:24px;padding:40px 32px;text-align:center;max-width:400px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.08)">
+          <div style="font-size:64px;margin-bottom:16px">🎉</div>
+          <div style="font-size:22px;font-weight:800;color:#1a1a2e;margin-bottom:8px">ชำระเงินสำเร็จแล้ว!</div>
+          <div style="font-size:14px;color:#666;margin-bottom:24px">ระบบกำลังปลดล็อค Premium ให้อัตโนมัติค่ะ<br>อาจใช้เวลา 1-2 นาที</div>
+          <a href="https://tangtangchinese.com" style="display:block;padding:14px;background:linear-gradient(135deg,#F13596,#c01078);color:white;border-radius:14px;text-decoration:none;font-weight:700;font-size:15px">
+            🏠 กลับไปเรียนได้เลย!
+          </a>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const pkg = params.get('pkg');
+  selectPackage(pkg && pkgData[pkg] ? pkg : 'yearly');
+
+  // auto-fill referral
+  const ref = params.get('ref');
+  if (ref) {
+    const input = document.getElementById('referral-code');
+    if (input) {
+      input.value = ref.toUpperCase();
+      input.style.borderColor = 'var(--green)';
+      input.style.background = 'var(--green-light)';
+      input.readOnly = true;
+      const tag = document.createElement('div');
+      tag.style.cssText = 'font-size:11px;color:var(--green);font-weight:700;margin-top:4px';
+      tag.textContent = '✅ ใช้โค้ดแนะนำจากเพื่อนแล้ว!';
+      input.parentNode.appendChild(tag);
+    }
+  }
+
+  initPage();
+});
+
+async function initPage() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return;
+  currentSessionUser = session.user;
+  const userEmail = session.user.email;
+  const userName = session.user.user_metadata?.name || userEmail;
+  const formCard = document.querySelector('.card:has(#fname)');
+  if (formCard) {
+    const firstSection = formCard.querySelector('.section-title');
+    if (firstSection) {
+      const banner = document.createElement('div');
+      banner.style.cssText = 'display:flex;align-items:center;gap:12px;padding:14px;background:#f0fdf4;border-radius:12px;border:1.5px solid #4caf50;margin-bottom:16px';
+      banner.innerHTML = `<div style="font-size:28px">✅</div><div><div style="font-size:13px;font-weight:800;color:#2e7d32">เข้าสู่ระบบแล้ว</div><div style="font-size:12px;color:#555;margin-top:2px">${userName} · ${userEmail}</div><div style="font-size:11px;color:#888;margin-top:2px">ไม่ต้องกรอกข้อมูลเพิ่ม กดยืนยันได้เลย</div></div>`;
+      firstSection.after(banner);
+      document.getElementById('fname').value = userName;
+      document.getElementById('email').value = userEmail;
+      document.getElementById('phone').readOnly = false;
+    }
+  }
+}
+
+function handleSlipFile(file) {
+  if (!file) return;
+  slipFile = file;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById('slip-preview-img').src = e.target.result;
+    document.getElementById('slip-preview').style.display = 'block';
+    document.getElementById('slip-placeholder').style.display = 'none';
+    document.getElementById('slip-err').textContent = '';
+    document.getElementById('slip-upload-area').style.borderColor = 'var(--green)';
+    document.getElementById('slip-upload-area').style.background = 'var(--green-light)';
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleSlipDrop(e) {
+  e.preventDefault();
+  document.getElementById('slip-upload-area').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) handleSlipFile(file);
+}
+
+async function uploadSlip(file, email) {
+  try {
+    const ext = file.name.split('.').pop() || 'jpg';
+    const filename = `${Date.now()}-${email.replace('@','_')}.${ext}`;
+    const { data, error } = await sb.storage.from('slips').upload(filename, file, { contentType: file.type, upsert: true });
+    if (error) throw error;
+    const { data: urlData } = sb.storage.from('slips').getPublicUrl(filename);
+    return urlData?.publicUrl || null;
+  } catch(e) { return null; }
+}
+
+async function sendLineNotify(name, phone, email, slipUrl, referralCode) {
+  try {
+    await fetch('https://zmshxxmcgbxavzlqmpxd.supabase.co/functions/v1/line-notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY },
+      body: JSON.stringify({ name, phone, email, slipUrl, referralCode, package: selectedPackage, amount: selectedAmountInt })
+    });
+  } catch(e) {}
+}
+
+async function saveToSupabase(name, phone, email, slipUrl, referralCode) {
+  try {
+    await sb.from('orders').insert({ name, phone, email, amount: selectedAmountInt, status: 'pending', slip_url: slipUrl || null, referral_code: referralCode || null, created_at: new Date().toISOString() });
+  } catch(e) {}
+}
+
+async function submitOrder() {
+  const fname    = document.getElementById('fname').value.trim();
+  const phone    = document.getElementById('phone').value.trim();
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const password2= document.getElementById('password2').value;
+  const err      = document.getElementById('form-err');
+  const slipErr  = document.getElementById('slip-err');
+  const btn      = document.querySelector('.btn-submit');
+  const isLoggedIn = !!currentSessionUser;
+
+  if (!isLoggedIn) {
+    if (!fname)  { err.textContent = 'กรุณากรอกชื่อ-นามสกุล'; return; }
+    if (!phone)  { err.textContent = 'กรุณากรอกเบอร์โทรศัพท์'; return; }
+    if (!email || !email.includes('@')) { err.textContent = 'กรุณากรอกอีเมลให้ถูกต้อง'; return; }
+    if (password.length < 6) { err.textContent = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัว'; return; }
+    if (password !== password2) { err.textContent = 'รหัสผ่านไม่ตรงกัน'; return; }
+  }
+  // ถ้าเลือกจ่ายบัตร → ไปที่ payWithStripe แทน ไม่ต้องแนบสลิป
+  if (selectedPayMethod === 'card') {
+    await payWithStripe();
+    return;
+  }
+  if (!slipFile) { slipErr.textContent = 'กรุณาแนบรูปสลิปการโอนเงิน'; document.getElementById('slip-upload-area').style.borderColor='var(--red)'; return; }
+
+  err.textContent = ''; slipErr.textContent = '';
+  if (btn) { btn.disabled = true; btn.innerHTML = '⏳ กำลังดำเนินการ...'; }
+
+  let error = null;
+  if (!isLoggedIn) {
+    const { error: signUpErr } = await sb.auth.signUp({ email, password, options: { data: { name: fname } } });
+    error = signUpErr;
+  }
+
+  const isEmailTaken = error && (error.message.includes('already registered') || error.message.includes('User already'));
+  if (error && !isEmailTaken) {
+    err.textContent = error.message;
+    if (btn) { btn.disabled = false; btn.innerHTML = '✅ ยืนยันการสั่งซื้อ — ฿' + selectedPrice; }
+    return;
+  }
+
+  const slipUrl = await uploadSlip(slipFile, email || currentSessionUser?.email || 'unknown');
+  const referralCode = document.getElementById('referral-code')?.value?.trim() || null;
+  await Promise.all([
+    saveToSupabase(fname || currentSessionUser?.user_metadata?.name, phone, email || currentSessionUser?.email, slipUrl, referralCode),
+    sendLineNotify(fname || currentSessionUser?.user_metadata?.name, phone, email || currentSessionUser?.email, slipUrl, referralCode)
+  ]);
+
+  if (btn) { btn.disabled = false; btn.innerHTML = '✅ ยืนยันการสั่งซื้อ — ฿' + selectedPrice; }
+  document.getElementById('success-overlay').classList.add('show');
+}
+
+function copyBankAcc() {
+  navigator.clipboard.writeText('5572835397').then(() => {
+    const btn = document.getElementById('copy-acc-btn');
+    if (btn) { btn.textContent = '✅ คัดลอกแล้ว!'; setTimeout(() => btn.textContent = 'คัดลอก', 2000); }
+  });
+}
+</script>
+</body>
+</html>
