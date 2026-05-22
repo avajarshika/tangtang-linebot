@@ -608,33 +608,31 @@ window.addEventListener('DOMContentLoaded', () => {
   // เช็ค success จาก Stripe
   if (params.get('success') === '1') {
     const pkg = params.get('pkg') || 'monthly';
-    const pkgAmounts: Record<string, number> = { monthly: 199, yearly: 990, lifetime: 2490 };
+    const pkgAmounts = { monthly: 199, yearly: 990, lifetime: 2490 };
 
     // ดึงข้อมูลลูกค้าจาก sessionStorage
     let orderInfo = { name: '-', phone: '-', email: '-', package: pkg, amount: pkgAmounts[pkg] || 199 };
     try {
       const saved = sessionStorage.getItem('stripe_order');
       if (saved) {
-        orderInfo = { ...orderInfo, ...JSON.parse(saved) };
+        orderInfo = Object.assign({}, orderInfo, JSON.parse(saved));
         sessionStorage.removeItem('stripe_order');
       }
     } catch(e) {}
 
-    // แจ้ง LINE notify พร้อมข้อมูลครบ
-    try {
-      await fetch('https://zmshxxmcgbxavzlqmpxd.supabase.co/functions/v1/line-notify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-        body: JSON.stringify({
-          name: orderInfo.name,
-          phone: orderInfo.phone,
-          email: orderInfo.email,
-          package: orderInfo.package,
-          amount: orderInfo.amount,
-          paymentMethod: 'บัตรเครดิต (Stripe)',
-        }),
-      });
-    } catch(e) {}
+    // แจ้ง LINE notify พร้อมข้อมูลครบ (async ถูกต้อง)
+    fetch('https://zmshxxmcgbxavzlqmpxd.supabase.co/functions/v1/line-notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY },
+      body: JSON.stringify({
+        name: orderInfo.name,
+        phone: orderInfo.phone,
+        email: orderInfo.email,
+        package: orderInfo.package,
+        amount: orderInfo.amount,
+        paymentMethod: 'บัตรเครดิต (Stripe)',
+      }),
+    }).catch(function(e) {});
 
     // แสดงหน้า success
     document.getElementById('success-overlay').classList.add('show');
