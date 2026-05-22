@@ -513,8 +513,9 @@ function selectPayMethod(method) {
 }
 
 async function payWithStripe() {
-  const email = document.getElementById('email')?.value?.trim();
-  const name = document.getElementById('name')?.value?.trim();
+  const email = document.getElementById('email')?.value?.trim() || currentSessionUser?.email;
+  const fname = document.getElementById('fname')?.value?.trim() || currentSessionUser?.user_metadata?.name || '';
+  const phone = document.getElementById('phone')?.value?.trim() || '-';
 
   if (!email) {
     alert('กรุณากรอกอีเมลก่อนนะคะ');
@@ -529,6 +530,15 @@ async function payWithStripe() {
     const priceId = STRIPE_PRICE_IDS[selectedPackage];
     const { data: { session } } = await sb.auth.getSession();
     const userId = session?.user?.id || '';
+
+    // เก็บข้อมูลลูกค้าไว้ใน sessionStorage เพื่อใช้ตอน success
+    sessionStorage.setItem('stripe_order', JSON.stringify({
+      name: fname,
+      phone,
+      email,
+      package: selectedPackage,
+      amount: selectedAmountInt,
+    }));
 
     const res = await fetch(`${SUPABASE_URL}/functions/v1/stripe-checkout`, {
       method: 'POST',
@@ -546,7 +556,6 @@ async function payWithStripe() {
     });
 
     const data = await res.json();
-
     if (data.url) {
       window.location.href = data.url;
     } else {
@@ -598,25 +607,36 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // เช็ค success จาก Stripe
   if (params.get('success') === '1') {
-    // แจ้ง LINE notify
     const pkg = params.get('pkg') || 'monthly';
     const pkgAmounts: Record<string, number> = { monthly: 199, yearly: 990, lifetime: 2490 };
+
+    // ดึงข้อมูลลูกค้าจาก sessionStorage
+    let orderInfo = { name: '-', phone: '-', email: '-', package: pkg, amount: pkgAmounts[pkg] || 199 };
+    try {
+      const saved = sessionStorage.getItem('stripe_order');
+      if (saved) {
+        orderInfo = { ...orderInfo, ...JSON.parse(saved) };
+        sessionStorage.removeItem('stripe_order');
+      }
+    } catch(e) {}
+
+    // แจ้ง LINE notify พร้อมข้อมูลครบ
     try {
       await fetch('https://zmshxxmcgbxavzlqmpxd.supabase.co/functions/v1/line-notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
         body: JSON.stringify({
-          name: 'ลูกค้า (บัตรเครดิต)',
-          phone: '-',
-          email: '-',
-          package: pkg,
-          amount: pkgAmounts[pkg] || 199,
+          name: orderInfo.name,
+          phone: orderInfo.phone,
+          email: orderInfo.email,
+          package: orderInfo.package,
+          amount: orderInfo.amount,
           paymentMethod: 'บัตรเครดิต (Stripe)',
         }),
       });
     } catch(e) {}
 
-    // แสดงหน้า success เดิม
+    // แสดงหน้า success
     document.getElementById('success-overlay').classList.add('show');
     return;
   }
