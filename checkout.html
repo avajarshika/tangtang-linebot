@@ -598,18 +598,26 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // เช็ค success จาก Stripe
   if (params.get('success') === '1') {
-    document.body.innerHTML = `
-      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--paper2);font-family:'DM Sans','Noto Sans Thai',sans-serif;padding:20px">
-        <div style="background:white;border-radius:24px;padding:40px 32px;text-align:center;max-width:400px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.08)">
-          <div style="font-size:64px;margin-bottom:16px">🎉</div>
-          <div style="font-size:22px;font-weight:800;color:#1a1a2e;margin-bottom:8px">ชำระเงินสำเร็จแล้ว!</div>
-          <div style="font-size:14px;color:#666;margin-bottom:24px">ระบบกำลังปลดล็อค Premium ให้อัตโนมัติค่ะ<br>อาจใช้เวลา 1-2 นาที</div>
-          <a href="https://tangtangchinese.com" style="display:block;padding:14px;background:linear-gradient(135deg,#F13596,#c01078);color:white;border-radius:14px;text-decoration:none;font-weight:700;font-size:15px">
-            🏠 กลับไปเรียนได้เลย!
-          </a>
-        </div>
-      </div>
-    `;
+    // แจ้ง LINE notify
+    const pkg = params.get('pkg') || 'monthly';
+    const pkgAmounts: Record<string, number> = { monthly: 199, yearly: 990, lifetime: 2490 };
+    try {
+      await fetch('https://zmshxxmcgbxavzlqmpxd.supabase.co/functions/v1/line-notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+        body: JSON.stringify({
+          name: 'ลูกค้า (บัตรเครดิต)',
+          phone: '-',
+          email: '-',
+          package: pkg,
+          amount: pkgAmounts[pkg] || 199,
+          paymentMethod: 'บัตรเครดิต (Stripe)',
+        }),
+      });
+    } catch(e) {}
+
+    // แสดงหน้า success เดิม
+    document.getElementById('success-overlay').classList.add('show');
     return;
   }
 
